@@ -51,14 +51,14 @@ resource containerEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
         customerId: logAnalytics.properties.customerId
-        sharedKey: listKeys(logAnalytics.id, '2022-10-01').primarySharedKey
+        sharedKey: logAnalytics.listKeys().primarySharedKey
       }
     }
   }
 }
 
 // ======================
-// Managed Identity
+// User Assigned Managed Identity
 // ======================
 
 resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
@@ -67,16 +67,16 @@ resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' 
 }
 
 // ======================
-// RBAC - AcrPull
+// RBAC - AcrPull Role Assignment
 // ======================
 
 resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, identity.id, 'AcrPull')
+  name: guid(resourceGroup().id, identity.id, acr.id)
   scope: acr
   properties: {
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
-      '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+      '7f951dda-4ed3-4680-a7ca-43fe172d538d' // AcrPull
     )
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'

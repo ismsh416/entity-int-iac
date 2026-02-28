@@ -24,8 +24,8 @@ jobs:
       - name: Deploy Bicep
         run: |
           az deployment group create \
-            --resource-group entity-integration-rg \
+            --resource-group ${{ secrets.AZURE_RG }} \
             --template-file bicep/main.bicep \
-            --parameters acrName=entityintegrationacr \
-                        containerAppName=entity-api \
-                        environmentName=entity-env
+            --parameters environmentName=${{ vars.ENVIRONMENT }} \
+                         projectName=${{ vars.PROJECT_NAME }} \
+                         location=${{ vars.LOCATION }}
