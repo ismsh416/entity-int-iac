@@ -1,34 +1,93 @@
-param location string = 'eastus'
-param containerAppName string
+targetScope = 'resourceGroup'
+
+@allowed([
+  'dev'
+  'uat'
+  'prod'
+])
 param environmentName string
 
-resource env 'Microsoft.App/managedEnvironments@2023-08-01-preview' = {
-  name: environmentName
+param projectName string
+param location string = resourceGroup().location
+
+var resourceToken = '${projectName}-${environmentName}-001'
+
+// ======================
+// Container Registry
+// ======================
+
+resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
+  name: toLower(replace('cr${resourceToken}', '-', ''))
   location: location
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    adminUserEnabled: false
+  }
 }
 
-resource containerApp 'Microsoft.App/containerApps@2023-08-01-preview' = {
-  name: containerAppName
+// ======================
+// Log Analytics
+// ======================
+
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+  name: 'log-${resourceToken}'
   location: location
   properties: {
-    managedEnvironmentId: env.id
-    configuration: {
-      ingress: {
-        external: true
-        targetPort: 8080
+    retentionInDays: 30
+  }
+}
+
+// ======================
+// Container Apps Environment
+// ======================
+
+resource containerEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
+  name: 'env-${resourceToken}'
+  location: location
+  properties: {
+    appLogsConfiguration: {
+      destination: 'log-analytics'
+      logAnalyticsConfiguration: {
+        customerId: logAnalytics.properties.customerId
+        sharedKey: listKeys(logAnalytics.id, '2022-10-01').primarySharedKey
       }
-    }
-    template: {
-      containers: [
-        {
-          name: 'entity-api'
-          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          resources: {
-            cpu: 0.5
-            memory: '1Gi'
-          }
-        }
-      ]
     }
   }
 }
+
+// ======================
+// Managed Identity
+// ======================
+
+resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: 'id-${resourceToken}'
+  location: location
+}
+
+// ======================
+// RBAC - AcrPull
+// ======================
+
+resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, identity.id, 'AcrPull')
+  scope: acr
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+    )
+    principalId: identity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// ======================
+// Outputs
+// ======================
+
+output acrName string = acr.name
+output acrLoginServer string = acr.properties.loginServer
+output containerEnvName string = containerEnv.name
+output managedIdentityId string = identity.id
