@@ -29,7 +29,8 @@ jobs:
         run: |
           az deployment group create \
             --resource-group poc-rg \
-            --template-file bicep/${{ github.event.inputs.environment }}.bicepparam
+            --template-file bicep/main.bicep \
+            --parameters @bicep/${{ github.event.inputs.environment }}.bicepparam
 #      - name: Deploy Bicep
 #        run: |
 #          az deployment group create \
