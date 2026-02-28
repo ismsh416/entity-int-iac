@@ -1,25 +1,13 @@
 param location string = 'eastus'
-param acrName string
 param containerAppName string
 param environmentName string
 
-resource acr 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' = {
-  name: acrName
-  location: location
-  sku: {
-    name: 'Basic'
-  }
-  properties: {
-    adminUserEnabled: true
-  }
-}
-
-resource env 'Microsoft.App/managedEnvironments@2023-05-01' = {
+resource env 'Microsoft.App/managedEnvironments@2023-08-01-preview' = {
   name: environmentName
   location: location
 }
 
-resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
+resource containerApp 'Microsoft.App/containerApps@2023-08-01-preview' = {
   name: containerAppName
   location: location
   properties: {
