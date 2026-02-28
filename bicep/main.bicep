@@ -6,7 +6,9 @@ param environmentName string
 resource acr 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' = {
   name: acrName
   location: location
-  sku: { name: 'Basic' }
+  sku: {
+    name: 'Basic'
+  }
   properties: {
     adminUserEnabled: true
   }
@@ -27,25 +29,12 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         external: true
         targetPort: 8080
       }
-      registries: [
-        {
-          server: acr.properties.loginServer
-          username: acr.listCredentials().username
-          passwordSecretRef: 'acr-secret'
-        }
-      ]
-      secrets: [
-        {
-          name: 'acr-secret'
-          value: acr.listCredentials().passwords[0].value
-        }
-      ]
     }
     template: {
       containers: [
         {
           name: 'entity-api'
-          image: '${acr.properties.loginServer}/entity-api:latest'
+          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           resources: {
             cpu: 0.5
             memory: '1Gi'
