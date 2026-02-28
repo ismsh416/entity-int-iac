@@ -15,8 +15,17 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Install latest Bicep
+        run: |
+          az bicep install
+          az bicep upgrade
+          az bicep version
+
       - name: Deploy Bicep
         run: |
           az deployment group create \
             --resource-group entity-integration-rg \
-            --template-file bicep/main.bicep
+            --template-file bicep/main.bicep \
+            --parameters acrName=entityintegrationacr \
+                        containerAppName=entity-api \
+                        environmentName=entity-env
