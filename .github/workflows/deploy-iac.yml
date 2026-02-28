@@ -19,7 +19,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
+      - name: Debug Secrets
+        run: |
+          echo "Client ID length: ${#AZURE_CLIENT_ID}"
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       - name: Azure Login
         uses: azure/login@v1
         with:
