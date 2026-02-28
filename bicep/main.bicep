@@ -58,7 +58,7 @@ resource containerEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
 }
 
 // ======================
-// User Assigned Managed Identity
+// Managed Identity
 // ======================
 
 resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
@@ -67,7 +67,7 @@ resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' 
 }
 
 // ======================
-// RBAC - AcrPull Role Assignment
+// RBAC - AcrPull
 // ======================
 
 resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
@@ -76,7 +76,7 @@ resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   properties: {
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
-      '7f951dda-4ed3-4680-a7ca-43fe172d538d' // AcrPull
+      '7f951dda-4ed3-4680-a7ca-43fe172d538d'
     )
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
