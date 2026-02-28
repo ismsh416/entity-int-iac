@@ -24,8 +24,17 @@ jobs:
       - name: Deploy Bicep
         run: |
           az deployment group create \
-            --resource-group ${{ secrets.AZURE_RG }} \
+            --resource-group poc-rg \
             --template-file bicep/main.bicep \
-            --parameters environmentName=${{ vars.ENVIRONMENT }} \
-                         projectName=${{ vars.PROJECT_NAME }} \
-                         location=${{ vars.LOCATION }}
+            --parameters \
+              environmentName=${{ vars.ENVIRONMENT }} \
+              projectName=${{ vars.PROJECT_NAME }} \
+              location=${{ vars.LOCATION }}
+#      - name: Deploy Bicep
+#        run: |
+#          az deployment group create \
+#            --resource-group ${{ secrets.AZURE_RG }} \
+#            --template-file bicep/main.bicep \
+#            --parameters environmentName=${{ vars.ENVIRONMENT }} \
+#                         projectName=${{ vars.PROJECT_NAME }} \
+#                         location=${{ vars.LOCATION }}
