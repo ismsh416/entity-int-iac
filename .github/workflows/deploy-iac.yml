@@ -1,8 +1,7 @@
 name: Deploy Infrastructure
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -20,7 +19,4 @@ jobs:
         run: |
           az deployment group create \
             --resource-group entity-integration-rg \
-            --template-file bicep/main.bicep \
-            --parameters acrName=entityintegrationacr \
-                        containerAppName=entity-api \
-                        environmentName=entity-env
+            --template-file bicep/main.bicep
